@@ -4,6 +4,10 @@ import SwiftUI
 struct ContentView: View {
     @AppStorage("symbolName") var symbolName = "custom.folder.fill.badge.sparkles"
 
+    @AppStorage("luminanceToAlpha") var luminanceToAlpha: Bool = true
+
+    @State var customIcon: Image?
+
     var body: some View {
         VStack(spacing: 16) {
             let color = Color(red: 0.21, green: 0.62, blue: 0.88)
@@ -13,9 +17,40 @@ struct ContentView: View {
                     d[.bottom] - d.height * 0.375
                 }
                 .overlay(alignment: .centerFirstTextBaseline) {
+                    let cgImage: CGImage? = customIcon.flatMap { icon in
+                        let content = icon
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+
+                        return if luminanceToAlpha {
+                            ImageRenderer(content: content
+                                .background(.white)
+                                .colorInvert()
+                                .drawingGroup()
+                                .luminanceToAlpha()
+                            ).cgImage
+                        } else {
+                            ImageRenderer(content: content).cgImage
+                        }
+                    }
+
                     ZStack {
-                        Image(_internalSystemName: symbolName)
-                        Image(symbolName)
+                        if let cgImage {
+                            Image(systemName: "circle")
+                                .hidden()
+                                .overlay {
+                                    let image = Image(decorative: cgImage, scale: 1)
+
+                                    image
+                                        .renderingMode(.template)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .scaleEffect(0.85)
+                                }
+                        } else {
+                            Image(_internalSystemName: symbolName)
+                            Image(symbolName)
+                        }
                     }
                     .font(.system(size: 180))
                     .offset(y: 25)
@@ -49,8 +84,23 @@ struct ContentView: View {
                                 NSPasteboard.general.clearContents()
                                 NSPasteboard.general.writeObjects([NSImage(cgImage: cgImage, size: .init(width: 1024, height: 1024))])
                             }
+
+                            if customIcon != nil {
+                                Divider()
+
+                                Toggle("Use Luminance as Alpha Channel", isOn: $luminanceToAlpha)
+
+                                Button("Clear Custom Icon") {
+                                    customIcon = nil
+                                }
+                            }
                         }
                 }
+            }
+            .dropDestination(for: Image.self) { items, _ in
+                customIcon = items.first
+
+                return true
             }
 
             GroupBox {
@@ -60,6 +110,7 @@ struct ContentView: View {
                 }
                 .padding(8)
             }
+            .disabled(customIcon != nil)
 
             HStack {
                 Label("[How to change icons for folders on macOS](https://support.apple.com/guide/mac-help/change-icons-for-files-or-folders-on-mac-mchlp2313/mac)", systemImage: "info.circle.fill")
