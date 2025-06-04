@@ -10,8 +10,6 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            let color = Color(red: 0.21, green: 0.62, blue: 0.88)
-
             let content = Image(ImageResource.folder512)
                 .alignmentGuide(.firstTextBaseline) { d in
                     d[.bottom] - d.height * 0.375
@@ -55,7 +53,7 @@ struct ContentView: View {
                     .font(.system(size: 180))
                     .offset(y: 25)
                     .foregroundStyle(
-                        color
+                        Color.folder
                             .shadow(.inner(color: .black.opacity(0.1), radius: 0.5, y: 0.5))
                             .shadow(.drop(color: .white.opacity(0.4), radius: 1, y: 1))
                     )
