@@ -4,9 +4,13 @@ import SwiftUI
 struct ContentView: View {
     @AppStorage("symbolName") var symbolName = "custom.folder.fill.badge.sparkles"
 
-    @AppStorage("luminanceToAlpha") var luminanceToAlpha: Bool = true
+    @AppStorage("luminanceToAlpha") var luminanceToAlpha = true
 
     @State var customIcon: Image?
+    
+    private var isCustomIcon: Bool {
+        customIcon != nil
+    }
 
     var body: some View {
         VStack(spacing: 16) {
@@ -83,15 +87,14 @@ struct ContentView: View {
                                 NSPasteboard.general.writeObjects([NSImage(cgImage: cgImage, size: .init(width: 1024, height: 1024))])
                             }
 
-                            if customIcon != nil {
-                                Divider()
-
+                            Section {
                                 Toggle("Use Luminance as Alpha Channel", isOn: $luminanceToAlpha)
 
                                 Button("Clear Custom Icon") {
                                     customIcon = nil
                                 }
                             }
+                            .disabled(!isCustomIcon)
                         }
                 }
             }
@@ -108,7 +111,7 @@ struct ContentView: View {
                 }
                 .padding(8)
             }
-            .disabled(customIcon != nil)
+            .disabled(isCustomIcon)
 
             HStack {
                 Label("[How to change icons for folders on macOS](https://support.apple.com/guide/mac-help/change-icons-for-files-or-folders-on-mac-mchlp2313/mac)", systemImage: "info.circle.fill")
