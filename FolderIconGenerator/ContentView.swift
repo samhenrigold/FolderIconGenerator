@@ -98,8 +98,11 @@ struct ContentView: View {
                         }
                 }
             }
-            .dropDestination(for: Image.self) { items, _ in
-                customIcon = items.first
+            .dropDestination(for: URL.self) { urls, _ in
+                guard let url = urls.first,
+                      let nsImage = NSImage(contentsOf: url) else { return false }
+                
+                customIcon = Image(nsImage: nsImage)
 
                 return true
             }
