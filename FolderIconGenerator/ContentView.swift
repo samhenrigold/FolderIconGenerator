@@ -100,9 +100,9 @@ struct ContentView: View {
             }
             .dropDestination(for: URL.self) { urls, _ in
                 guard let url = urls.first,
-                      let nsImage = NSImage(contentsOf: url) else { return false }
+                      let image = imageForURL(url) else { return false }
                 
-                customIcon = Image(nsImage: nsImage)
+                customIcon = image
 
                 return true
             }
@@ -132,6 +132,11 @@ struct ContentView: View {
         .padding()
         .frame(width: 512, height: 512)
         .navigationTitle("Folder Icon Generator")
+    
+    private func imageForURL(_ url: URL) -> Image? {
+        guard let nsImage = NSImage(contentsOf: url) else { return nil }
+        
+        return Image(nsImage: nsImage)
     }
 }
 
